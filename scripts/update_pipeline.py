@@ -6,6 +6,7 @@ Daily YouTube Update Pipeline for Bhajan Marg Channel
 - Saves new questions to PostgreSQL database
 - Rebuilds FAISS and BM25 indexes only if new questions are added
 - Logs all activity to logs/update.log
+- AUTO-PUSHES updated indexes to GitHub (so Railway auto-deploys)
 """
 
 import os
@@ -14,6 +15,7 @@ import re
 import pickle
 import logging
 import time
+import subprocess
 import yt_dlp
 from datetime import datetime, timedelta
 from sqlalchemy import create_engine, text, Column, Integer, String, DateTime
@@ -185,6 +187,40 @@ def rebuild_indexes():
     faiss.write_index(index, FAISS_PATH)
     logger.info("Indexes rebuilt successfully.")
 
+def push_to_github():
+    """Push updated index files to GitHub to trigger Railway auto-deploy."""
+    try:
+        # Get the git root directory
+        git_root = subprocess.check_output(['git', 'rev-parse', '--show-toplevel'], 
+                                           text=True).strip()
+        os.chdir(git_root)
+        
+        # Check if index files have changed
+        status = subprocess.run(['git', 'status', '--porcelain', 'indexs/'], 
+                               capture_output=True, text=True)
+        
+        if not status.stdout.strip():
+            logger.info("No changes to index files. Skipping git push.")
+            return
+        
+        # Add index files
+        subprocess.run(['git', 'add', 'indexs/'], check=True)
+        
+        # Commit with timestamp
+        timestamp = datetime.now().strftime("%Y-%m-%d %H:%M")
+        subprocess.run(['git', 'commit', '-m', f"Auto-update indexes with new data [{timestamp}]"], 
+                       check=True)
+        
+        # Push to GitHub
+        subprocess.run(['git', 'push', 'origin', 'main'], check=True)
+        
+        logger.info("✅ Successfully pushed updated indexes to GitHub!")
+        
+    except subprocess.CalledProcessError as e:
+        logger.error(f"Git operation failed: {e}")
+    except Exception as e:
+        logger.error(f"Failed to push to GitHub: {e}")
+
 def main():
     logger.info("=== Starting daily update pipeline ===")
     try:
@@ -207,6 +243,9 @@ def main():
         if total_added > 0:
             logger.info(f"Total new questions: {total_added}. Rebuilding indexes...")
             rebuild_indexes()
+            # NEW: Push updated indexes to GitHub
+            logger.info("Pushing updated indexes to GitHub...")
+            push_to_github()
         else:
             logger.info("No new questions added.")
     except Exception as e:

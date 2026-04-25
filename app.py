@@ -550,6 +550,8 @@ if os.path.exists(os.path.join(os.path.dirname(__file__), "scripts", "update_pip
     scheduler.add_job(scheduled_update, CronTrigger(hour=20, minute=0))
     scheduler.start()
     print("Daily YouTube update pipeline scheduled at 8:00 PM.")
+# ... (rest of your code)
+
 if __name__ == "__main__":
-    port = int(os.environ.get("PORT", 8000))
-    uvicorn.run(app, host="0.0.0.0", port=port)
+    # Force the port to 8000 regardless of environment
+    uvicorn.run(app, host="0.0.0.0", port=8000)

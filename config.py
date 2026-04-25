@@ -3,7 +3,7 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-DATABASE_URL = os.getenv("DATABASE_URL")
+DATABASE_URL = "postgresql://gwfjfkqolmfcwtpgrtqr.postgres:Umang%4096564142@aws-0-ap-southeast-1.pooler.supabase.com:5432/postgres?sslmode=require"
 EMBEDDING_MODEL = "intfloat/multilingual-e5-small"
 FAISS_PATH = "indexes/vector_index_combined.faiss"
 BM25_PATH = "indexes/bm25_index.pkl"

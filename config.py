@@ -3,7 +3,7 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-DATABASE_URL = os.getenv("DATABASE_URL", "postgresql://umang@localhost/satsang")
+DATABASE_URL = os.getenv("DATABASE_URL")
 EMBEDDING_MODEL = "intfloat/multilingual-e5-small"
 FAISS_PATH = "indexes/vector_index_combined.faiss"
 BM25_PATH = "indexes/bm25_index.pkl"

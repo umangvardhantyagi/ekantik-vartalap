@@ -82,8 +82,15 @@ cross_encoder = CrossEncoder("cross-encoder/ms-marco-MiniLM-L-6-v2")
 
 os.makedirs(os.path.dirname(FAISS_PATH), exist_ok=True)
 
-if not os.path.exists(FAISS_PATH) or not os.path.exists(BM25_PATH):
-    print("Index files missing. Rebuilding from database...")
+# Check if pre-computed index files exist
+if os.path.exists(FAISS_PATH) and os.path.exists(BM25_PATH):
+    print("🚀 Pre-computed index found! Loading instantly...")
+    index = faiss.read_index(FAISS_PATH)
+    with open(BM25_PATH, "rb") as f:
+        bm25 = pickle.load(f)
+    print("✅ Indexes loaded successfully!")
+else:
+    print("⚠️ Index files not found. Starting manual rebuild from database...")
     sync_engine = create_engine(sync_url)
     with sync_engine.connect() as conn:
         result = conn.execute(text("SELECT search_text FROM questions ORDER BY id"))
@@ -99,11 +106,10 @@ if not os.path.exists(FAISS_PATH) or not os.path.exists(BM25_PATH):
     faiss_index = faiss.IndexFlatIP(dimension)
     faiss_index.add(embeddings.astype('float32'))
     faiss.write_index(faiss_index, FAISS_PATH)
-    print("Indexes rebuilt successfully.")
+    index = faiss_index
+    bm25 = bm25_obj
+    print("✅ Indexes rebuilt successfully!")
 
-index = faiss.read_index(FAISS_PATH)
-with open(BM25_PATH, "rb") as f:
-    bm25 = pickle.load(f)
 print("Ready.")
 
 # ---------------------------
@@ -550,7 +556,6 @@ if os.path.exists(os.path.join(os.path.dirname(__file__), "scripts", "update_pip
     scheduler.add_job(scheduled_update, CronTrigger(hour=20, minute=0))
     scheduler.start()
     print("Daily YouTube update pipeline scheduled at 8:00 PM.")
-# ... (rest of your code)
 
 if __name__ == "__main__":
     # Force the port to 8000 regardless of environment

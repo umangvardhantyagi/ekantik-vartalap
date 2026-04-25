@@ -95,7 +95,6 @@
             position: relative;
         }
 
-        /* --- SIMPLE WHITE SEARCH BOX --- */
         .search-container {
             display: flex;
             background: #ffffff;
@@ -142,7 +141,6 @@
             background: var(--accent-gold);
             color: #1a1a1a;
         }
-        /* --------------------------------- */
 
         .dropdown {
             position: absolute;
@@ -375,7 +373,7 @@
 
 <div class="search-wrapper">
     <div class="search-container">
-        <input type="text" id="queryInput" class="search-input" placeholder="Enter your question..." autocomplete="off">
+        <input type="text" id="queryInput" class="search-input" placeholder="Enter your question..." autocomplete="off" spellcheck="false">
         <button id="searchButton" class="search-btn">SEARCH</button>
     </div>
     <div id="dropdownMenu" class="dropdown"></div>
@@ -405,7 +403,7 @@
 </div>
 
 <script>
-    // ==================== FULL FUNCTIONALITY (unchanged logic) ====================
+    // ==================== OPTIMIZED PERFORMANCE ====================
     const input = document.getElementById('queryInput');
     const searchBtn = document.getElementById('searchButton');
     const dropdown = document.getElementById('dropdownMenu');
@@ -527,10 +525,15 @@
         }
     });
 
+    // OPTIMIZED performSearch function - batches HTML for single render
     async function performSearch(query) {
+        // Instant UI feedback
+        dropdown.style.display = 'none';
         if (!query.trim()) return;
+        
         lastSearchedQuery = query;
         loader.style.display = 'block';
+        resultsDiv.style.display = 'none';
         resultsDiv.innerHTML = '';
 
         try {
@@ -540,11 +543,15 @@
                 body: JSON.stringify({ query: query })
             });
             const data = await response.json();
+            
             loader.style.display = 'none';
+            
+            // Batch all HTML into one string
+            let htmlContent = '';
 
             if (data.fallback === true) {
-                const msgHtml = `<div class="fallback-message">${escapeHtml(data.message)}</div>`;
-                const videosHtml = data.results.map(item => `
+                htmlContent += `<div class="fallback-message">${escapeHtml(data.message)}</div>`;
+                htmlContent += data.results.map(item => `
                     <div class="result-card">
                         <a href="${item.video_url}" target="_blank" style="text-decoration: none; color: inherit;">
                             <h3>${escapeHtml(item.title)}</h3>
@@ -555,12 +562,8 @@
                         </a>
                     </div>
                 `).join('');
-                resultsDiv.innerHTML = msgHtml + videosHtml;
-                return;
-            }
-
-            if (data.results && data.results.length > 0) {
-                resultsDiv.innerHTML = data.results.map(item => `
+            } else if (data.results && data.results.length > 0) {
+                htmlContent = data.results.map(item => `
                     <div class="result-card">
                         <a href="${item.video_url}" target="_blank" style="text-decoration: none; color: inherit;">
                             <h3>${escapeHtml(item.question)}</h3>
@@ -576,11 +579,17 @@
                     </div>
                 `).join('');
             } else {
-                resultsDiv.innerHTML = `<div class="empty-state">No matching answers found. Please try a different spiritual question.</div>`;
+                htmlContent = `<div class="empty-state">No matching answers found. Please try a different spiritual question.</div>`;
             }
+
+            // Single DOM update - much faster!
+            resultsDiv.innerHTML = htmlContent;
+            resultsDiv.style.display = 'block';
+
         } catch(err) {
             console.error("Search failed", err);
             loader.style.display = 'none';
+            resultsDiv.style.display = 'block';
             resultsDiv.innerHTML = `<div class="empty-state">Network error. Please try again.</div>`;
         }
     }

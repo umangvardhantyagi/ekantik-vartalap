@@ -1,0 +1,631 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>Bhajan Marg | Official Search</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&family=Noto+Sans+Devanagari:wght@500;700;800&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --primary-deep: #0f1a12;
+            --accent-gold: #b38b40;
+            --border-color: #d1c7b7;
+            --bg-soft: #fcfaf7;
+            --card-shadow: 0 10px 30px rgba(0,0,0,0.08);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; -webkit-font-smoothing: antialiased; }
+
+        body {
+            background-color: var(--bg-soft);
+            font-family: 'Inter', 'Noto Sans Devanagari', sans-serif;
+            color: var(--primary-deep);
+            line-height: 1.5;
+        }
+
+        .navbar {
+            background: #ffffff;
+            padding: 15px 5%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 2px solid var(--accent-gold);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: 800;
+            color: var(--primary-deep);
+            text-decoration: none;
+            letter-spacing: -0.5px;
+        }
+
+        .logo span { color: var(--accent-gold); }
+
+        .top-badge {
+            font-size: 0.7rem;
+            font-weight: 700;
+            background: var(--primary-deep);
+            color: #fff;
+            padding: 6px 12px;
+            border-radius: 4px;
+            text-transform: uppercase;
+        }
+
+        .hero {
+            text-align: center;
+            padding: 60px 20px 40px;
+            max-width: 850px;
+            margin: 0 auto;
+        }
+
+        .hero h1 {
+            font-size: 2.2rem;
+            font-weight: 800;
+            color: var(--primary-deep);
+            margin-bottom: 15px;
+            line-height: 1.2;
+            overflow-wrap: break-word;
+        }
+
+        .hero h1 span {
+            display: block;
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: var(--accent-gold);
+            margin-top: 8px;
+        }
+
+        .hero p {
+            font-size: 1rem;
+            color: #4a4a4a;
+            font-weight: 500;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .search-wrapper {
+            max-width: 650px;
+            margin: 0 auto;
+            padding: 0 15px;
+            position: relative;
+        }
+
+        /* --- SIMPLE WHITE SEARCH BOX --- */
+        .search-container {
+            display: flex;
+            background: #ffffff;
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            overflow: hidden;
+            transition: all 0.2s ease;
+        }
+
+        .search-container:focus-within {
+            border-color: var(--accent-gold);
+            box-shadow: 0 0 0 3px rgba(179, 139, 64, 0.1);
+        }
+
+        .search-input {
+            flex: 1;
+            border: none;
+            outline: none;
+            padding: 16px 20px;
+            font-size: 1rem;
+            font-weight: 400;
+            background: #ffffff;
+            color: #1a1a1a;
+            width: 100%;
+            font-family: inherit;
+        }
+
+        .search-input::placeholder {
+            color: #aaa;
+        }
+
+        .search-btn {
+            background: var(--primary-deep);
+            color: #ffffff;
+            border: none;
+            padding: 0 28px;
+            font-weight: 700;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .search-btn:hover {
+            background: var(--accent-gold);
+            color: #1a1a1a;
+        }
+        /* --------------------------------- */
+
+        .dropdown {
+            position: absolute;
+            top: calc(100% + 8px);
+            left: 15px;
+            right: 15px;
+            background: #ffffff;
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+            z-index: 99;
+            display: none;
+            overflow: hidden;
+            max-height: 260px;
+            overflow-y: auto;
+        }
+
+        .dropdown-item {
+            padding: 14px 20px;
+            cursor: pointer;
+            border-bottom: 1px solid #f0ece4;
+            font-size: 0.9rem;
+            font-weight: 500;
+            transition: all 0.2s;
+        }
+
+        .dropdown-item:hover {
+            background: var(--bg-soft);
+            color: var(--accent-gold);
+            padding-left: 26px;
+        }
+
+        .dropdown-loading {
+            padding: 14px 20px;
+            text-align: center;
+            color: var(--accent-gold);
+            font-style: italic;
+        }
+
+        .results-area {
+            max-width: 700px;
+            margin: 40px auto;
+            padding: 0 15px 100px;
+        }
+
+        .result-card {
+            background: #ffffff;
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 24px;
+            margin-bottom: 20px;
+            text-decoration: none;
+            display: block;
+            transition: all 0.2s ease;
+        }
+
+        .result-card:hover {
+            border-color: var(--primary-deep);
+            box-shadow: var(--card-shadow);
+        }
+
+        .result-card h3 {
+            font-size: 1.25rem;
+            font-weight: 800;
+            color: var(--primary-deep);
+            margin-bottom: 12px;
+            line-height: 1.4;
+        }
+
+        .meta-info {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.85rem;
+            font-weight: 700;
+            color: var(--accent-gold);
+            border-top: 1px solid #eee;
+            padding-top: 15px;
+        }
+
+        .feedback-row {
+            display: flex;
+            gap: 15px;
+            margin-top: 15px;
+            justify-content: flex-end;
+        }
+
+        .feedback-btn {
+            background: none;
+            border: 1px solid var(--border-color);
+            padding: 5px 12px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 0.8rem;
+            transition: all 0.2s;
+        }
+
+        .feedback-btn:hover {
+            border-color: var(--accent-gold);
+            background: #fcfaf7;
+        }
+
+        .fallback-message {
+            background: #fff8e7;
+            border-left: 4px solid var(--accent-gold);
+            padding: 16px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            font-size: 0.9rem;
+            color: #5a4a2e;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 50px 20px;
+            background: #ffffff;
+            border-radius: 12px;
+            color: #aaa;
+            border: 1px solid var(--border-color);
+        }
+
+        .loader {
+            text-align: center;
+            margin: 20px 0;
+            font-size: 0.9rem;
+            color: var(--accent-gold);
+            display: none;
+            font-weight: 600;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 2000;
+            justify-content: center;
+            align-items: center;
+        }
+        .modal-content {
+            background: white;
+            border-radius: 24px;
+            padding: 24px;
+            max-width: 320px;
+            text-align: center;
+            border: 1px solid var(--border-color);
+        }
+        .star-rating {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin: 16px 0;
+            font-size: 1.8rem;
+            cursor: pointer;
+        }
+        .star { color: #ddd; transition: 0.2s; }
+        .star.selected { color: #f5b301; }
+        .modal button {
+            background: var(--primary-deep);
+            color: white;
+            border: none;
+            padding: 8px 20px;
+            border-radius: 40px;
+            margin-top: 12px;
+            cursor: pointer;
+        }
+        .close-btn {
+            background: none !important;
+            color: #888 !important;
+            text-decoration: underline;
+            margin-top: 8px;
+        }
+
+        .toast {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #eef3e8;
+            color: var(--primary-deep);
+            padding: 10px 24px;
+            border-radius: 50px;
+            font-size: 0.8rem;
+            z-index: 3000;
+            opacity: 0;
+            transition: opacity 0.3s;
+            pointer-events: none;
+            font-weight: 600;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+        }
+
+        footer {
+            text-align: center;
+            padding: 30px;
+            font-weight: 700;
+            color: #999;
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            border-top: 1px solid var(--border-color);
+            margin-top: 30px;
+        }
+
+        @media (max-width: 600px) {
+            .hero h1 { font-size: 1.6rem; }
+            .hero h1 span { font-size: 1rem; }
+            .hero p { font-size: 0.9rem; }
+            .search-container { flex-direction: column; border-radius: 12px; }
+            .search-btn { padding: 12px; width: 100%; border-top: 1px solid var(--border-color); }
+            .navbar { padding: 10px 15px; }
+            .logo { font-size: 1.2rem; }
+            .top-badge { display: none; }
+            .result-card h3 { font-size: 1.1rem; }
+        }
+    </style>
+</head>
+<body>
+
+<nav class="navbar">
+    <a href="/" class="logo">BHAJAN<span>MARG</span></a>
+    <div class="top-badge">Shree Hit Premanand Ji Maharaj</div>
+</nav>
+
+<div class="hero">
+    <h1>अपने प्रश्न पूछें <span>Ask Your Questions Here</span></h1>
+    <p>Find answers from the divine discourses of Maharaj Ji</p>
+</div>
+
+<div class="search-wrapper">
+    <div class="search-container">
+        <input type="text" id="queryInput" class="search-input" placeholder="Enter your question..." autocomplete="off">
+        <button id="searchButton" class="search-btn">SEARCH</button>
+    </div>
+    <div id="dropdownMenu" class="dropdown"></div>
+    <div id="loader" class="loader">Seeking wisdom...</div>
+</div>
+
+<div class="results-area" id="resultsArea"></div>
+
+<footer>
+    Radha Keli Kunj, Vrindavan Dham
+</footer>
+
+<!-- Rating Modal -->
+<div id="ratingModal" class="modal">
+    <div class="modal-content">
+        <h3>How was your search experience?</h3>
+        <div class="star-rating" id="starRating">
+            <span class="star" data-value="1">☆</span>
+            <span class="star" data-value="2">☆</span>
+            <span class="star" data-value="3">☆</span>
+            <span class="star" data-value="4">☆</span>
+            <span class="star" data-value="5">☆</span>
+        </div>
+        <button id="submitRating">Submit Rating</button>
+        <button class="close-btn" id="closeRatingBtn">Not now</button>
+    </div>
+</div>
+
+<script>
+    // ==================== FULL FUNCTIONALITY (unchanged logic) ====================
+    const input = document.getElementById('queryInput');
+    const searchBtn = document.getElementById('searchButton');
+    const dropdown = document.getElementById('dropdownMenu');
+    const resultsDiv = document.getElementById('resultsArea');
+    const loader = document.getElementById('loader');
+    const ratingModal = document.getElementById('ratingModal');
+    const stars = document.querySelectorAll('#starRating .star');
+    let selectedRating = 0;
+    let lastSearchedQuery = '';
+    let debounceTimer = null;
+
+    if (!sessionStorage.getItem('ratingShown')) {
+        setTimeout(() => {
+            ratingModal.style.display = 'flex';
+            sessionStorage.setItem('ratingShown', 'true');
+        }, 180000);
+    }
+
+    stars.forEach(star => {
+        star.addEventListener('click', () => {
+            const value = parseInt(star.getAttribute('data-value'));
+            selectedRating = value;
+            stars.forEach(s => {
+                const starValue = parseInt(s.getAttribute('data-value'));
+                if (starValue <= value) {
+                    s.textContent = '★';
+                    s.classList.add('selected');
+                } else {
+                    s.textContent = '☆';
+                    s.classList.remove('selected');
+                }
+            });
+        });
+    });
+
+    document.getElementById('submitRating').addEventListener('click', async () => {
+        if (selectedRating === 0) {
+            showToast("Please select a rating before submitting.");
+            return;
+        }
+        try {
+            const response = await fetch('/rating', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ query: lastSearchedQuery || "general", rating: selectedRating })
+            });
+            if (response.ok) {
+                showToast("Thank you for your rating! We appreciate your feedback.");
+                ratingModal.style.display = 'none';
+                selectedRating = 0;
+                stars.forEach(s => {
+                    s.textContent = '☆';
+                    s.classList.remove('selected');
+                });
+            } else {
+                showToast("Could not submit rating. Please try again.");
+            }
+        } catch(e) {
+            console.error(e);
+            showToast("Network error. Please try again.");
+        }
+    });
+
+    document.getElementById('closeRatingBtn').addEventListener('click', () => {
+        ratingModal.style.display = 'none';
+    });
+
+    input.addEventListener('input', () => {
+        const q = input.value.trim();
+        if (debounceTimer) clearTimeout(debounceTimer);
+        if (q.length < 2) {
+            dropdown.style.display = 'none';
+            return;
+        }
+        dropdown.innerHTML = '<div class="dropdown-loading">Loading suggestions...</div>';
+        dropdown.style.display = 'block';
+        debounceTimer = setTimeout(async () => {
+            try {
+                const resp = await fetch(`/suggest?q=${encodeURIComponent(q)}`);
+                const suggestions = await resp.json();
+                if (suggestions.length > 0) {
+                    const limited = suggestions.slice(0, 6);
+                    dropdown.innerHTML = limited.map(s => `<div class="dropdown-item">${escapeHtml(s)}</div>`).join('');
+                    dropdown.style.display = 'block';
+                } else {
+                    dropdown.style.display = 'none';
+                }
+            } catch(e) {
+                console.error("Suggest error", e);
+                dropdown.style.display = 'none';
+            }
+        }, 300);
+    });
+
+    dropdown.addEventListener('click', (e) => {
+        const item = e.target.closest('.dropdown-item');
+        if (item) {
+            input.value = item.innerText;
+            dropdown.style.display = 'none';
+            performSearch(input.value);
+        }
+    });
+
+    searchBtn.addEventListener('click', () => {
+        dropdown.style.display = 'none';
+        performSearch(input.value.trim());
+    });
+
+    input.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') {
+            dropdown.style.display = 'none';
+            performSearch(input.value.trim());
+        }
+    });
+
+    document.addEventListener('click', (e) => {
+        if (!e.target.closest('.search-wrapper')) {
+            dropdown.style.display = 'none';
+        }
+    });
+
+    async function performSearch(query) {
+        if (!query.trim()) return;
+        lastSearchedQuery = query;
+        loader.style.display = 'block';
+        resultsDiv.innerHTML = '';
+
+        try {
+            const response = await fetch('/search', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ query: query })
+            });
+            const data = await response.json();
+            loader.style.display = 'none';
+
+            if (data.fallback === true) {
+                const msgHtml = `<div class="fallback-message">${escapeHtml(data.message)}</div>`;
+                const videosHtml = data.results.map(item => `
+                    <div class="result-card">
+                        <a href="${item.video_url}" target="_blank" style="text-decoration: none; color: inherit;">
+                            <h3>${escapeHtml(item.title)}</h3>
+                            <div class="meta-info">
+                                <span>Radha Naam</span>
+                                <span>${item.timestamp}</span>
+                            </div>
+                        </a>
+                    </div>
+                `).join('');
+                resultsDiv.innerHTML = msgHtml + videosHtml;
+                return;
+            }
+
+            if (data.results && data.results.length > 0) {
+                resultsDiv.innerHTML = data.results.map(item => `
+                    <div class="result-card">
+                        <a href="${item.video_url}" target="_blank" style="text-decoration: none; color: inherit;">
+                            <h3>${escapeHtml(item.question)}</h3>
+                            <div class="meta-info">
+                                <span>Shree Hit Premanand Ji Maharaj</span>
+                                <span>${item.timestamp}</span>
+                            </div>
+                        </a>
+                        <div class="feedback-row">
+                            <button class="feedback-btn" onclick="sendFeedback('${escapeHtml(query)}', ${item.id}, 1)">Helpful 👍</button>
+                            <button class="feedback-btn" onclick="sendFeedback('${escapeHtml(query)}', ${item.id}, -1)">Not Clear 👎</button>
+                        </div>
+                    </div>
+                `).join('');
+            } else {
+                resultsDiv.innerHTML = `<div class="empty-state">No matching answers found. Please try a different spiritual question.</div>`;
+            }
+        } catch(err) {
+            console.error("Search failed", err);
+            loader.style.display = 'none';
+            resultsDiv.innerHTML = `<div class="empty-state">Network error. Please try again.</div>`;
+        }
+    }
+
+    async function sendFeedback(query, questionId, rating) {
+        try {
+            const response = await fetch('/feedback', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ query, question_id: questionId, rating })
+            });
+            if (response.ok) {
+                showToast("Thank you for your feedback! We are continuously working to give you the best.");
+            } else {
+                showToast("Feedback could not be sent. Please try again.");
+            }
+        } catch(e) {
+            console.error("Feedback error", e);
+            showToast("Network error. Please try again.");
+        }
+    }
+
+    function showToast(message) {
+        let toast = document.querySelector('.toast');
+        if (!toast) {
+            toast = document.createElement('div');
+            toast.className = 'toast';
+            document.body.appendChild(toast);
+        }
+        toast.textContent = message;
+        toast.style.opacity = '1';
+        setTimeout(() => {
+            toast.style.opacity = '0';
+        }, 3000);
+    }
+
+    function escapeHtml(str) {
+        if (!str) return '';
+        return str.replace(/[&<>]/g, function(m) {
+            if (m === '&') return '&amp;';
+            if (m === '<') return '&lt;';
+            if (m === '>') return '&gt;';
+            return m;
+        });
+    }
+</script>
+</body>
+</html>

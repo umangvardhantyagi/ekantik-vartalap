@@ -1,0 +1,10 @@
+__pycache__/
+radha/
+indexes/
+docker/
+static/
+logs/
+data/
+.DS_Store
+*.pyc
+*.bak
